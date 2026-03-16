@@ -35,46 +35,54 @@ set(PICO_CXX_ENABLE_RTTI 1)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-# Add executable. Default name is the project name, version 0.1
+# ==================== NOVA ORGANIZAÇÃO DOS ARQUIVOS ====================
+# Lista todos os arquivos fonte
+set(SOURCES
+    main.c
+    src/motor_control.c
+    src/wifi_comm.c
+    freertos_callbacks.c
+)
 
-add_executable(FreeRTOS_Pico2W FreeRTOS_Pico2W.cpp freertos_callbacks.c )
+# Add executable com os fontes organizados
+add_executable(FreeRTOS_Pico2W ${SOURCES})
 
 pico_set_program_name(FreeRTOS_Pico2W "FreeRTOS_Pico2W")
 pico_set_program_version(FreeRTOS_Pico2W "0.1")
 
-# Generate PIO header
+# Generate PIO header (se ainda precisar)
 pico_generate_pio_header(FreeRTOS_Pico2W ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(FreeRTOS_Pico2W 1)
 pico_enable_stdio_usb(FreeRTOS_Pico2W 1)
 
-# Add the standard library to the build
-target_link_libraries(FreeRTOS_Pico2W
-        pico_stdlib)
-
-# Add the standard include files to the build
+# ==================== DIRETÓRIOS DE INCLUDE ====================
+# Adiciona os diretórios de include (inc/ e a raiz)
 target_include_directories(FreeRTOS_Pico2W PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}      # Para FreeRTOSConfig.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc   # Para nossos headers
 )
 
-# Add any user requested libraries
+# ==================== BIBLIOTECAS ====================
 target_link_libraries(FreeRTOS_Pico2W 
-        hardware_spi
-        hardware_i2c
-        hardware_dma
-        hardware_pio
-        hardware_interp
-        hardware_timer
-        hardware_watchdog
-        hardware_clocks
-        hardware_pwm
-        pico_cyw43_arch_lwip_sys_freertos
-        )
+    pico_stdlib
+    hardware_spi
+    hardware_i2c
+    hardware_dma
+    hardware_pio
+    hardware_interp
+    hardware_timer
+    hardware_watchdog
+    hardware_clocks
+    hardware_pwm
+    hardware_gpio
+    pico_cyw43_arch_lwip_sys_freertos
+)
 
 pico_add_extra_outputs(FreeRTOS_Pico2W)
 
-# Add FreeRTOS
+# ==================== FREERTOS ====================
 set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/FreeRTOS-Kernel-main")
 include(FreeRTOS_Kernel_import.cmake)
 
@@ -83,5 +91,5 @@ target_include_directories(FreeRTOS_Pico2W PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 # Add the FreeRTOS library to the build
 target_link_libraries(FreeRTOS_Pico2W
-        FreeRTOS-Kernel-Heap4
+    FreeRTOS-Kernel-Heap4
 )
